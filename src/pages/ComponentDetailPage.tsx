@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import { API_URL, COMPONENT_TYPES } from '../config';
+import { API_URL, COMPONENT_TYPES, DEFAULT_COMPONENT_IMAGE } from '../config';
 import { ArrowLeft, ShoppingCart, Check, AlertTriangle } from 'lucide-react';
 
 interface Component {
@@ -51,16 +51,25 @@ const ComponentDetailPage: React.FC = () => {
 
       setLoading(true);
       try {
-        const response = await axios.get(`${API_URL}/api/components/${type}/${id}`);
-        setComponent(response.data);
+        // Fix the API endpoint URL by removing the duplicate "api"
+        const response = await axios.get(`${API_URL}/components/${type}/${id}`);
+        // Ensure price is a number
+        const componentData = {
+          ...response.data,
+          price: Number(response.data.price) || 0
+        };
+        setComponent(componentData);
         
         // For demo purposes, fetch some compatible components
         if (type === 'cpus' || type === 'motherboards') {
           const compatType = type === 'cpus' ? 'motherboards' : 'cpus';
-          const compatResponse = await axios.get(`${API_URL}/api/compatibility/${type}/${id}/${compatType}`);
+          const compatResponse = await axios.get(`${API_URL}/compatibility/${type}/${id}/${compatType}`);
           setCompatibleWith({
             type: compatType,
-            components: compatResponse.data
+            components: compatResponse.data.map((comp: any) => ({
+              ...comp,
+              price: Number(comp.price) || 0
+            }))
           });
         }
       } catch (error) {

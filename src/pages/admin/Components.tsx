@@ -40,7 +40,12 @@ const AdminComponents: React.FC = () => {
     try {
       setLoading(true);
       const response = await axios.get(`${API_URL}/components/${selectedType}`);
-      setComponents(response.data);
+      // Ensure all components have numeric prices
+      const processedComponents = response.data.map((comp: any) => ({
+        ...comp,
+        price: Number(comp.price) || 0
+      }));
+      setComponents(processedComponents);
     } catch (error) {
       console.error('Error fetching components:', error);
       setComponents([]);
@@ -210,7 +215,7 @@ const AdminComponents: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
-                      ${component.price.toFixed(2)}
+                      ${Number(component.price).toFixed(2)}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
