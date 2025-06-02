@@ -339,6 +339,25 @@ const isAdmin = (req, res, next) => {
   next();
 };
 
+// Add the /auth/me endpoint
+app.get('/api/auth/me', authenticateToken, async (req, res) => {
+  try {
+    const [users] = await db.execute(
+      'SELECT id, name, email, role, created_at FROM users WHERE id = ?',
+      [req.user.id]
+    );
+
+    if (users.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({ user: users[0] });
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Auth routes
 app.post('/api/auth/register', async (req, res) => {
   try {

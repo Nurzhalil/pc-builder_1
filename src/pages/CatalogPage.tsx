@@ -83,23 +83,22 @@ const ComponentCatalogPage: React.FC = () => {
                       type === 'storage' ? 100 : 
                       type === 'psu' ? 80 : 
                       type === 'cases' ? 100 : 
-                      type === 'coolers' ? 50 : 
-                      type === 'monitors' ? 250 : 50;
+                      type === 'coolers' ? 50 : 100;
     
     for (let i = 1; i <= count; i++) {
-      const randomPrice = basePrice + Math.floor(Math.random() * basePrice * 1.5);
+      const randomPrice = Number(basePrice + Math.floor(Math.random() * basePrice * 1.5));
       let mockComponent: Component = {
         id: i,
         name: `${type.charAt(0).toUpperCase() + type.slice(1, -1)} Model ${i}`,
         price: randomPrice,
-        image_url: DEFAULT_COMPONENT_IMAGE
+        image_url: `https://via.placeholder.com/200x200.png?text=${type}`
       };
       
       // Add specific properties based on component type
       if (type === 'cpus') {
         mockComponent = {
           ...mockComponent,
-          name: `Intel Core i${Math.min(3 + Math.floor(i / 3), 9)} Gen ${10 + Math.floor(i / 4)}`,
+          name: `${i % 2 === 0 ? 'Intel Core i' : 'AMD Ryzen '}${Math.min(3 + Math.floor(i / 3), 9)}${i % 2 === 0 ? '-1' : ' '}${i % 5 + 1}00${i % 2 === 0 ? 'K' : 'X'}`,
           socket: i % 2 === 0 ? 'LGA1700' : 'AM5',
           cores: 4 + (i % 8),
           threads: 8 + (i % 8),
@@ -110,7 +109,7 @@ const ComponentCatalogPage: React.FC = () => {
       } else if (type === 'gpus') {
         mockComponent = {
           ...mockComponent,
-          name: `NVIDIA RTX ${i % 2 === 0 ? '40' : '30'}${i % 9 + 1}0`,
+          name: `${i % 2 === 0 ? 'NVIDIA RTX' : 'AMD Radeon RX'} ${i % 2 === 0 ? '40' : '70'}${i % 9 + 1}0${i % 2 === 0 ? '' : 'XT'}`,
           memory_size: 8 + (i % 3) * 4,
           memory_type: 'GDDR6',
           tdp: 150 + (i % 5) * 30
