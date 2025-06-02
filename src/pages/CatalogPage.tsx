@@ -59,7 +59,12 @@ const ComponentCatalogPage: React.FC = () => {
       setLoading(true);
       try {
         const response = await axios.get(`${API_URL}/components/${selectedType}`);
-        setComponents(response.data);
+        // Ensure all components have a numeric price
+        const processedComponents = response.data.map((comp: any) => ({
+          ...comp,
+          price: Number(comp.price) || 0
+        }));
+        setComponents(processedComponents);
       } catch (error) {
         console.error('Error fetching components:', error);
         // For demo purposes, create mock data if API fails
@@ -289,7 +294,7 @@ const ComponentCatalogPage: React.FC = () => {
                         </h3>
                         
                         <div className="mt-2 flex justify-between items-center">
-                          <span className="text-gray-900 font-bold">${component.price.toFixed(2)}</span>
+                          <span className="text-gray-900 font-bold">${Number(component.price).toFixed(2)}</span>
                           <span className="text-sm text-blue-600 font-medium">View Details</span>
                         </div>
                         
