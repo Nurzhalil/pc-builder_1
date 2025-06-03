@@ -51,9 +51,7 @@ const ComponentDetailPage: React.FC = () => {
 
       setLoading(true);
       try {
-        // Fix the API endpoint URL by removing the duplicate "api"
         const response = await axios.get(`${API_URL}/components/${type}/${id}`);
-        // Ensure price is a number
         const componentData = {
           ...response.data,
           price: Number(response.data.price) || 0
@@ -384,9 +382,17 @@ const ComponentDetailPage: React.FC = () => {
                 src={component.image_url}
                 alt={component.name}
                 className="max-h-full object-contain"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = DEFAULT_COMPONENT_IMAGE;
+                }}
               />
             ) : (
-              <div className="text-gray-400 text-lg">No Image Available</div>
+              <img
+                src={DEFAULT_COMPONENT_IMAGE}
+                alt={component.name}
+                className="max-h-full object-contain"
+              />
             )}
           </div>
         </div>
