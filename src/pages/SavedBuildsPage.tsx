@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { API_URL } from '../config';
 import { Trash2, Edit, ExternalLink, AlertTriangle, Package, Calendar, DollarSign } from 'lucide-react';
+import Cookies from 'js-cookie';
 
 interface Component {
   id: number;
@@ -29,8 +30,7 @@ const SavedBuildsPage: React.FC = () => {
   useEffect(() => {
     const fetchBuilds = async () => {
       try {
-        // Fix the API endpoint URL and add proper auth header
-        const token = localStorage.getItem('token');
+        const token = Cookies.get('token');
         if (!token) {
           throw new Error('No authentication token found');
         }
@@ -56,7 +56,7 @@ const SavedBuildsPage: React.FC = () => {
         setBuilds(processedBuilds);
       } catch (err: any) {
         console.error('Error fetching builds:', err);
-        setError(err.response?.data?.message || 'Failed to load saved builds');
+        setError(err.response?.data?.message || err.message || 'Failed to load saved builds');
       } finally {
         setLoading(false);
       }
@@ -75,7 +75,7 @@ const SavedBuildsPage: React.FC = () => {
     }
 
     try {
-      const token = localStorage.getItem('token');
+      const token = Cookies.get('token');
       if (!token) {
         throw new Error('No authentication token found');
       }
@@ -90,7 +90,7 @@ const SavedBuildsPage: React.FC = () => {
       setBuilds(builds.filter(build => build.id !== buildId));
     } catch (err: any) {
       console.error('Error deleting build:', err);
-      setError(err.response?.data?.message || 'Failed to delete build');
+      setError(err.response?.data?.message || err.message || 'Failed to delete build');
     }
   };
 
