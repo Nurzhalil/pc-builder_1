@@ -29,24 +29,34 @@ const SavedBuildsPage: React.FC = () => {
   useEffect(() => {
     const fetchBuilds = async () => {
       try {
-        const response = await axios.get(`${API_URL}/builds`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        // Fix the API endpoint URL and add proper auth header
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
+
+        const response = await axios.get(`${API_URL}/api/builds`, {
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         });
         
-        // Ensure prices are numbers
-        const processedBuilds = response.data.map((build: Build) => ({
+        // Ensure prices are numbers and handle potential null/undefined values
+        const processedBuilds = response.data.map((build: any) => ({
           ...build,
-          total_price: Number(build.total_price),
-          components: build.components.map(comp => ({
+          total_price: Number(build.total_price) || 0,
+          components: Array.isArray(build.components) ? build.components.map((comp: any) => ({
             ...comp,
-            price: Number(comp.price)
-          }))
+            price: Number(comp.price) || 0,
+            type: comp.type || 'unknown'
+          })) : []
         }));
         
         setBuilds(processedBuilds);
-      } catch (err) {
-        setError('Failed to load saved builds');
+      } catch (err: any) {
         console.error('Error fetching builds:', err);
+        setError(err.response?.data?.message || 'Failed to load saved builds');
       } finally {
         setLoading(false);
       }
@@ -54,6 +64,8 @@ const SavedBuildsPage: React.FC = () => {
 
     if (user) {
       fetchBuilds();
+    } else {
+      setLoading(false);
     }
   }, [user]);
 
@@ -63,13 +75,22 @@ const SavedBuildsPage: React.FC = () => {
     }
 
     try {
-      await axios.delete(`${API_URL}/builds/${buildId}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      await axios.delete(`${API_URL}/api/builds/${buildId}`, {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
+      
       setBuilds(builds.filter(build => build.id !== buildId));
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error deleting build:', err);
-      setError('Failed to delete build');
+      setError(err.response?.data?.message || 'Failed to delete build');
     }
   };
 
