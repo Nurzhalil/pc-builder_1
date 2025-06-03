@@ -35,7 +35,7 @@ const SavedBuildsPage: React.FC = () => {
           throw new Error('No authentication token found');
         }
 
-        const response = await axios.get(`${API_URL}/api/builds`, {
+        const response = await axios.get(`${API_URL}/builds`, {
           headers: { 
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -80,7 +80,7 @@ const SavedBuildsPage: React.FC = () => {
         throw new Error('No authentication token found');
       }
 
-      await axios.delete(`${API_URL}/api/builds/${buildId}`, {
+      await axios.delete(`${API_URL}/builds/${buildId}`, {
         headers: { 
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
