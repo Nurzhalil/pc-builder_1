@@ -7,6 +7,12 @@ import bcrypt from 'bcryptjs';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs/promises';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Load environment variables
 dotenv.config();
@@ -504,18 +510,18 @@ app.put('/api/admin/components/:type/:id', authenticateToken, isAdmin, upload.si
   const { type, id } = req.params;
   const componentData = req.body;
   
-  if (req.file) {
-    // Delete old image if exists
-    const [oldComponent] = await db.execute(`SELECT image_url FROM ${type} WHERE id = ?`, [id]);
-    if (oldComponent[0]?.image_url) {
-      const oldPath = path.join(__dirname, '..', oldComponent[0].image_url);
-      await fs.unlink(oldPath).catch(() => {});
+  try {
+    if (req.file) {
+      // Delete old image if exists
+      const [oldComponent] = await db.execute(`SELECT image_url FROM ${type} WHERE id = ?`, [id]);
+      if (oldComponent[0]?.image_url) {
+        const oldPath = path.join(__dirname, '..', oldComponent[0].image_url);
+        await fs.unlink(oldPath).catch(() => {});
+      }
+      
+      componentData.image_url = `/uploads/${req.file.filename}`;
     }
     
-    componentData.image_url = `/uploads/${req.file.filename}`;
-  }
-  
-  try {
     const updates = Object.entries(componentData)
       .map(([key, _]) => `${key} = ?`)
       .join(', ');
@@ -610,7 +616,7 @@ app.get('/api/builds', authenticateToken, async (req, res) => {
         const componentDetails = await Promise.all(
           components.map(async (comp) => {
             const [details] = await db.execute(
-              `SELECT * FROM ${comp.component_type} WHERE id = ?`,
+              `SELECT * FROM ${comp.component_type}s WHERE id = ?`,
               [comp.component_id]
             );
             return {
